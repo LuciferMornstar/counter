@@ -1,43 +1,47 @@
 import requests
 
 def get_stats():
+    # These headers make us look like a real browser visiting their dashboard
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://socialcounts.org/',
+        'Origin': 'https://socialcounts.org'
     }
+    
     stats = {"tiktok": "0", "insta": "0", "fb": "0"}
     
-    # TikTok
+    # 1. TikTok (via SocialCounts API)
     try:
-        r = requests.get("https://livesubs.io/api/tiktok/luciferm0rn1ngstar", headers=headers, timeout=15)
+        r = requests.get("https://api.socialcounts.org/live/tiktok/luciferm0rn1ngstar", headers=headers, timeout=10)
         stats["tiktok"] = str(r.json().get("followers", 0))
     except Exception as e:
         print(f"TikTok Fail: {e}")
 
-    # Instagram
+    # 2. Instagram (via SocialCounts API)
     try:
-        r = requests.post("https://blastup.com/api/instagram/follower-count", 
-                          json={"username": "s666luc"}, headers=headers, timeout=15)
-        stats["insta"] = str(r.json().get("count", 0))
+        r = requests.get("https://api.socialcounts.org/live/instagram/s666luc", headers=headers, timeout=10)
+        stats["insta"] = str(r.json().get("followers", 0))
     except Exception as e:
         print(f"Insta Fail: {e}")
 
-    # Facebook
+    # 3. Facebook (via SocialCounts API)
     try:
-        r = requests.get("https://api.livecounts.nl/facebook-live-follower-count/search/Lucifer.irl", headers=headers, timeout=15)
-        stats["fb"] = str(r.json().get("followerCount", 0))
+        r = requests.get("https://api.socialcounts.org/live/facebook/Lucifer.irl", headers=headers, timeout=10)
+        stats["fb"] = str(r.json().get("followers", 0))
     except Exception as e:
         print(f"FB Fail: {e}")
 
     return stats
 
-# Generate the HTML
+# Generate the HTML bridge
 data = get_stats()
-html_template = f"""<!DOCTYPE html><html><body>
+html_content = f"""<!DOCTYPE html><html><body>
 <div id="tiktok">{data['tiktok']}</div>
 <div id="insta">{data['insta']}</div>
 <div id="fb">{data['fb']}</div>
 </body></html>"""
 
 with open("index.html", "w") as f:
-    f.write(html_template)
-print("Done!")
+    f.write(html_content)
+
+print(f"SCRAPER RESULT: {data}")
