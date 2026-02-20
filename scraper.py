@@ -1,54 +1,43 @@
 import requests
-import json
 
 def get_stats():
-    # We use a real browser "User-Agent" to avoid being blocked
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
     stats = {"tiktok": "0", "insta": "0", "fb": "0"}
     
-    # 1. TikTok (Livesubs)
+    # TikTok
     try:
-        r = requests.get("https://livesubs.io/api/tiktok/luciferm0rn1ngstar", headers=headers, timeout=10)
+        r = requests.get("https://livesubs.io/api/tiktok/luciferm0rn1ngstar", headers=headers, timeout=15)
         stats["tiktok"] = str(r.json().get("followers", 0))
     except Exception as e:
-        print(f"TikTok Error: {e}")
+        print(f"TikTok Fail: {e}")
 
-    # 2. Instagram (Blastup)
+    # Instagram
     try:
         r = requests.post("https://blastup.com/api/instagram/follower-count", 
-                          json={"username": "s666luc"}, headers=headers, timeout=10)
+                          json={"username": "s666luc"}, headers=headers, timeout=15)
         stats["insta"] = str(r.json().get("count", 0))
     except Exception as e:
-        print(f"Insta Error: {e}")
+        print(f"Insta Fail: {e}")
 
-    # 3. Facebook (Livecounts)
+    # Facebook
     try:
-        # Note: Livecounts often requires a specific search first, but this API is usually open
-        r = requests.get("https://api.livecounts.nl/facebook-live-follower-count/search/Lucifer.irl", headers=headers, timeout=10)
-        stats["fb"] = str(r.json().get("followerCount", r.json().get("count", 0)))
+        r = requests.get("https://api.livecounts.nl/facebook-live-follower-count/search/Lucifer.irl", headers=headers, timeout=15)
+        stats["fb"] = str(r.json().get("followerCount", 0))
     except Exception as e:
-        print(f"FB Error: {e}")
+        print(f"FB Fail: {e}")
 
     return stats
 
-def update_html(stats):
-    # This format is easy for Google Script to RegEx
-    html_content = f"""<!DOCTYPE html>
-<html>
-<head><title>Social Stats Bridge</title></head>
-<body>
-  <div id="tiktok">{stats['tiktok']}</div>
-  <div id="insta">{stats['insta']}</div>
-  <div id="fb">{stats['fb']}</div>
-</body>
-</html>"""
-    
-    with open("index.html", "w") as f:
-        f.write(html_content)
+# Generate the HTML
+data = get_stats()
+html_template = f"""<!DOCTYPE html><html><body>
+<div id="tiktok">{data['tiktok']}</div>
+<div id="insta">{data['insta']}</div>
+<div id="fb">{data['fb']}</div>
+</body></html>"""
 
-if __name__ == "__main__":
-    data = get_stats()
-    update_html(data)
-    print(f"Successfully updated index.html with: {data}")
+with open("index.html", "w") as f:
+    f.write(html_template)
+print("Done!")
