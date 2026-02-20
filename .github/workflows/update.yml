@@ -1,0 +1,27 @@
+name: Update Social Stats
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+  workflow_dispatch: # Allows manual run
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run scraper
+        run: python scraper.py
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "SocialBot"
+          git config --global user.email "bot@github.com"
+          git add index.html
+          git commit -m "Update stats" || exit 0
+          git push
